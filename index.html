@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Estudiantil</title>
+</head>
+<body>
+    <h1>Bienvenido a la Universidad UAN</h1>
+    
+    <h2>Estudiantes Registrados</h2>
+    <ul id="students-list">
+        {% for estudiante in estudiantes %}
+            <!-- Mostrar el código del estudiante antes del nombre -->
+            <li>{{ estudiante.codigo }} - {{ estudiante.nombre }} {{ estudiante.apellido }} - Promedio: {{ estudiante.promedio }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Registrar Estudiante</h2>
+    <form id="register-student-form">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required><br>
+        
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" required><br>
+        
+        <button type="submit">Registrar Estudiante</button>
+    </form>
+    
+    <h2>Registrar Nota</h2>
+    <form id="register-note-form">
+        <label for="estudiante_codigo">Código Estudiante:</label>
+        <input type="number" id="estudiante_codigo" required><br>
+        
+        <label for="curso_codigo">Código Curso:</label>
+        <input type="number" id="curso_codigo" required><br>
+        
+        <label for="nota">Nota:</label>
+        <input type="number" id="nota" step="0.01" min="1.5" max="5.0" required><br>
+        
+        <button type="submit">Registrar Nota</button>
+    </form>
+    
+    <script>
+        document.getElementById('register-student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value;
+
+            fetch('/register_student', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nombre: nombre,
+                    apellido: apellido
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                // Agregar el nuevo estudiante a la lista con el código incluido
+                const newStudentItem = document.createElement('li');
+                newStudentItem.textContent = `${data.codigo} - ${nombre} ${apellido} - Promedio: 0`;  // Usando el código recibido
+                document.getElementById('students-list').appendChild(newStudentItem);
+            })
+            .catch(error => {
+                alert('Error al registrar estudiante:', error);
+                console.error('Error al registrar estudiante:', error);
+            });
+        });
+
+        document.getElementById('register-note-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const estudiante_codigo = document.getElementById('estudiante_codigo').value;
+            const curso_codigo = document.getElementById('curso_codigo').value;
+            const nota = document.getElementById('nota').value;
+
+            fetch('/register_note', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    estudiante_codigo: parseInt(estudiante_codigo),
+                    curso_codigo: parseInt(curso_codigo),
+                    nota: parseFloat(nota)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                alert('Error al registrar nota:', error);
+                console.error('Error al registrar nota:', error);
+            });
+        });
+    </script>
+</body>
+</html>
